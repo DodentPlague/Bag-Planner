@@ -2,9 +2,11 @@
 
 # dependencies
 node_modules/
+Client/node_modules
 
 # Expo
 .expo/
+Client/.expo
 dist/
 web-build/
 expo-env.d.ts
@@ -41,3 +43,8 @@ app-example
 # generated native folders
 /ios
 /android
+node_modules
+
+# IDEs and editors
+.vscode/
+.idea/
