@@ -18,6 +18,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private final HashMap<String, RequestHandler> requestHandlers = new HashMap<>();
 
     public HttpServerHandler() {
+        LOGGER.info("Initializing HTTP Server Handler and registering request handlers");
         RequestHandler[] handlers = {
             // ALL HANDLERS HERE
         };
