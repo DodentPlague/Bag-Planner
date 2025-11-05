@@ -5,6 +5,10 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
+import tech.allydoes.BudgetAppServer.handlers.GET.GetUserState;
+import tech.allydoes.BudgetAppServer.handlers.POST.RegisterUser;
+import tech.allydoes.BudgetAppServer.handlers.POST.SetUserState;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,7 +24,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public HttpServerHandler() {
         LOGGER.info("Initializing HTTP Server Handler and registering request handlers");
         RequestHandler[] handlers = {
-            // ALL HANDLERS HERE
+            new GetUserState(),
+            new SetUserState(),
+            new RegisterUser()
         };
         for (RequestHandler handler : handlers) {
             requestHandlers.put(handler.getRequestName().toLowerCase(), handler);

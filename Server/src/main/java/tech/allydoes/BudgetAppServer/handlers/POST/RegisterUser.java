@@ -2,6 +2,7 @@ package tech.allydoes.BudgetAppServer.handlers.POST;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,12 +11,13 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import tech.allydoes.FakeDatabase;
+import tech.allydoes.BudgetAppServer.handlers.HttpServerHandler;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
-public class SetUserState implements RequestHandler {
+public class RegisterUser implements RequestHandler {
     @Override
     public String getRequestName() {
-        return "SetUserState";
+        return "RegisterUser";
     }
 
     @Override
@@ -28,26 +30,14 @@ public class SetUserState implements RequestHandler {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> parameters = queryStringDecoder.parameters();
 
-        if (!parameters.containsKey("userId") || parameters.get("userId").isEmpty()) {
-            return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(
-                    request.protocolVersion(),
-                    HttpResponseStatus.BAD_REQUEST));
+        UUID userId = UUID.randomUUID();
+        while (FakeDatabase.exists(userId.toString())) {
+            userId = UUID.randomUUID();
         }
 
-        String userId = parameters.get("userId").get(0);
         String body = request.content().toString(io.netty.util.CharsetUtil.UTF_8);
-        HttpResponseStatus status;
+        FakeDatabase.set(userId.toString(), body);
 
-        if (!FakeDatabase.exists(userId)) {
-            status = HttpResponseStatus.NOT_FOUND;
-        } else {
-            FakeDatabase.set(userId, body);
-            status = HttpResponseStatus.OK;
-        }
-
-        return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(
-                request.protocolVersion(),
-                status));
+        return HttpServerHandler.sendContent("{\"userId\":\"" + userId.toString() + "\"}", request, channelHandlerContext);
     }
-
 }
