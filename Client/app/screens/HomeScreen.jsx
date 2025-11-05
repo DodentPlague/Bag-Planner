@@ -1,19 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from "react";
+import { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/Style';
 import { useAppState } from '../constants/UserState';
+import AddBudget from '../ui/AddBudget';
 import BudgetCard from '../ui/BudgetCard';
 
-
 export default function HomeScreen() {
-    const { name, setName, money, setMoney, budgets, setBudgets } = useAppState();
-    const [cards, setCards] = useState([]);
+    const { name, money, budgets, setBudgets } = useAppState();
+    const [showModal, setShowModal] = useState(false);
 
-    const addCard = () => {
-        setCards([
-            ...cards,
-            { title: "New Budget", allocated: 0, used: 0 }
+    const addBudgetCard = (title, allocated) => {
+        setBudgets([
+        ...budgets,
+        { title, allocated, used: 0 }
         ]);
     };
 
@@ -22,7 +22,7 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
-                    <Text style={styles.welcome}>Welcome, Tim!</Text>
+                    <Text style={styles.welcome}>Welcome, {name}!</Text>
                     <TouchableOpacity style={styles.iconButton}>
                         <Ionicons name="globe-outline" size={24} color="#555" />
                     </TouchableOpacity>
@@ -35,25 +35,31 @@ export default function HomeScreen() {
                             <Ionicons name="add-circle-outline" size={24} color="#555" />
                         </TouchableOpacity>
                     </View>
-                    <Text style={styles.balance}>$1,234,567.89</Text>
+                    <Text style={styles.balance}>${money.toLocaleString()}</Text>
                 </View>
 
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Your Budgets:</Text>
-                    <TouchableOpacity onPress={addCard}>
+                    <TouchableOpacity onPress={() => setShowModal(true)}>
                         <Ionicons name="add-circle-outline" size={24} color="#555" />
                     </TouchableOpacity>
                 </View>
 
-                {cards.map((card, index) => (
+                {budgets.map((budget, index) => (
                     <BudgetCard
                         key={index}
-                        title={card.title}
-                        allocated={card.allocated}
-                        used={card.used}
+                        title={budget.title}
+                        allocated={budget.allocated}
+                        used={budget.used}
                     />
                 ))}
             </ScrollView>
+
+            <AddBudget
+                visible={showModal}
+                onClose={() => setShowModal(false)}
+                onSubmit={addBudgetCard}
+            />
 
             <View style={styles.navbar}>
                 <TouchableOpacity style={styles.navItem}>

@@ -99,4 +99,40 @@ export default StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
+  modalOverlay: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "rgba(0,0,0,0.5)"
+},
+modalContainer: {
+  width: "80%",
+  padding: 20,
+  backgroundColor: "#fff",
+  borderRadius: 10
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginBottom: 10
+},
+input: {
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 6,
+  padding: 10,
+  marginVertical: 8
+},
+modalButtons: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 10
+},
+modalCancel: {
+  padding: 10
+},
+modalAdd: {
+  padding: 10
+}
+
 });
