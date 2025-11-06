@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class Database {
-    private static final String URL = "jdbc:sqlite:mydb.db";
+    private static final String URL = "jdbc:sqlite:bagplanner_db.db";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL);
