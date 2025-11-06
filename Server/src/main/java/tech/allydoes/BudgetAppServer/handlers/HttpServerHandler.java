@@ -26,7 +26,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         RequestHandler[] handlers = {
             new GetUserState(),
             new SetUserState(),
-            new RegisterUser()
+            new RegisterUser(),
         };
         for (RequestHandler handler : handlers) {
             requestHandlers.put(handler.getRequestName().toLowerCase(), handler);
@@ -47,7 +47,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
-        String path = request.uri().split("\\?", 15)[0].toLowerCase();
+        String path = request.uri().split("\\?", 15)[0].toLowerCase().substring(1);
         if (requestHandlers.containsKey(path) && requestHandlers.get(path).getRequestType().equalsIgnoreCase(request.method().name())) {
             return requestHandlers.get(path).processRequest(channelHandlerContext, request);
         } else {

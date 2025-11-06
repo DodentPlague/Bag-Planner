@@ -1,5 +1,6 @@
 package tech.allydoes.BudgetAppServer.handlers.GET;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,8 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import tech.allydoes.FakeDatabase;
+import tech.allydoes.Database;
+import tech.allydoes.UserState;
 import tech.allydoes.BudgetAppServer.handlers.HttpServerHandler;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
@@ -37,11 +39,24 @@ public class GetUserState implements RequestHandler {
         }
         String userId = parameters.get("userId").get(0);
 
-        Object data = FakeDatabase.get(userId);
+        // TODO: differentiate between an SQLException (return 500) and non-existant id (return 404)
+        Object data = Database.queryList("SELECT * FROM Accounts WHERE id=?;", (resultSet) -> {
+            try {
+                UserState userState = new UserState();
+                userState.username = resultSet.getString("username");
+                return userState;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }, userId);
+        
         if (data == null) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.NOT_FOUND));
         }
 
         return HttpServerHandler.sendContent(gson.toJson(data), request, channelHandlerContext);
     }
+
+    
 }
