@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import tech.allydoes.AuthenticatedUsers;
 import tech.allydoes.Database;
+import tech.allydoes.FixedPoint;
 import tech.allydoes.BudgetAppServer.handlers.HttpServerHandler;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
@@ -72,6 +73,8 @@ public class GetUserState implements RequestHandler {
         public String username;
         public List<Budget> budgets;
         public List<String> connections;
+        public int balanceDollars;
+        public int balanceCents;
 
         public UserStateResponse(int userId) {
             List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budgets WHERE user_id=?", (resultSet) -> {
@@ -108,9 +111,13 @@ public class GetUserState implements RequestHandler {
                 }
             }, userId, userId);
 
+            FixedPoint balance = AuthenticatedUsers.getBalance(userId);
+
             this.username = AuthenticatedUsers.usernameFromId(userId);
             this.budgets = budgetQuery;
             this.connections = connectionQuery;
+            this.balanceDollars = balance.getInteger();
+            this.balanceCents = balance.getDecimal();
         }
     }
 
