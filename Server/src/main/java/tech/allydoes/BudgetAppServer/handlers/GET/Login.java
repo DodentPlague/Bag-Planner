@@ -1,12 +1,14 @@
 package tech.allydoes.BudgetAppServer.handlers.GET;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.Blake3;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,11 +34,18 @@ public class Login implements RequestHandler{
     }
 
     @Override
+    /**
+     *  Check if the provided username and password matches a login
+     *  If so, return a token. 
+     * 
+     *  @see AuthenticatedUsers for more about tokens
+     */ 
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
+        // Standard request boilerplate
         LoginRequest loginRequest;
         try {
             loginRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), LoginRequest.class);
-        } catch (Exception e) {
+        } catch (JsonSyntaxException e) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
@@ -44,6 +53,7 @@ public class Login implements RequestHandler{
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
+        // Convert the password to bytes to make it easier to combine with the salt later
         byte[] passwordBytes = loginRequest.password.getBytes(StandardCharsets.UTF_8);
 
         List<Object> loginInfoQuery = Database.queryList("SELECT * FROM Users WHERE username=?", (resultSet) -> {
@@ -53,12 +63,8 @@ public class Login implements RequestHandler{
                 info.hashedPassword = resultSet.getBytes("password");
                 info.salt = resultSet.getBytes("salt");
 
-                if (info.hashedPassword == null || info.salt == null) {
-                    return null;
-                }
-
                 return info;
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -70,8 +76,10 @@ public class Login implements RequestHandler{
 
         LoginInfo loginInfo = (LoginInfo) loginInfoQuery.get(0);
 
+        // Combine the salt with the password
         byte[] saltedPassword = Arrays.copyOf(loginInfo.salt, loginInfo.salt.length + passwordBytes.length);
         System.arraycopy(passwordBytes, 0, saltedPassword, loginInfo.salt.length, passwordBytes.length);
+
         byte[] hashedPassword = hashPassword(saltedPassword);
 
         if (Arrays.equals(hashedPassword, loginInfo.hashedPassword)) {
@@ -84,6 +92,9 @@ public class Login implements RequestHandler{
         }
     }
 
+    /**
+     * Hashes the password with blake3
+     */
     private byte[] hashPassword(byte[] saltedPassword) {
         // Taken from https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/Blake3.html
         Blake3 hasher = Blake3.initHash();

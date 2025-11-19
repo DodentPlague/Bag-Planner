@@ -28,7 +28,14 @@ public class PayUser implements RequestHandler{
     }
     
     @Override
+    /**
+     * Takes a token and a recipient's username and transfers money from the token's account to the recipient's
+     * 
+     * In the future, there should be safety checks to make sure a user can't send more than they own
+     * Currently we do not check for this
+     */
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
+        // Standard request boilerplate
         PayUserRequest payRequest;
         try {
             payRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), PayUserRequest.class);

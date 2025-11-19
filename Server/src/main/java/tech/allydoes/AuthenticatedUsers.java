@@ -12,6 +12,10 @@ public class AuthenticatedUsers {
     public static HashMap<String, Integer> authenticatedUsers = new HashMap<>();
 
     public static Integer idFromToken(String token) {
+        // Looping through the keys instead of using containsKey
+        // because containsKey doesn't work for some reason
+        //
+        // My guess is a limitation of Java's hashing function but I'm not sure
         for (Entry<String, Integer> entry : authenticatedUsers.entrySet()) {
             if (entry.getKey().equals(token)) {
                 return authenticatedUsers.get(token);
@@ -21,6 +25,9 @@ public class AuthenticatedUsers {
         return null;
     }
 
+    /*
+     * Adds a userId to the hashtable of authenticated users (token/userId)
+     */
     public static String authenticateUser(int userId) {
         SecureRandom secureRandom = new SecureRandom();
         byte[] bytes = new byte[64];
@@ -30,6 +37,9 @@ public class AuthenticatedUsers {
         return token;
     }
 
+    /*
+     * Removes a token from the authentication hashmap
+     */
     public static void Logout(String token) {
         for (String key : authenticatedUsers.keySet()) {
             if (key.equals(token)) {

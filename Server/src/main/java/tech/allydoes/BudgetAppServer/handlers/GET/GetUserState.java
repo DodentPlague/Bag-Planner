@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,11 +32,17 @@ public class GetUserState implements RequestHandler {
     }
 
     @Override
+    /** 
+     * Most of this function is boilerplate, the real guts of it is the data query at the bottom
+     * That query will call the UserStateResponse constructor which will get all known data
+     * then processRequest will return it
+     * @see UserStateResponse
+    */ 
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
         UserStateRequest userStateRequest;
         try {
             userStateRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), UserStateRequest.class);
-        } catch (Exception e) {
+        } catch (JsonSyntaxException e) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
@@ -48,7 +55,8 @@ public class GetUserState implements RequestHandler {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.NOT_FOUND));
         }
 
-        // TODO: differentiate between an SQLException (return 500) and non-existant id (return 404)
+        // The aforementioned guts
+        // TODO(emi): differentiate between an SQLException (return 500) and non-existant id (return 404)
         List<UserStateResponse> data = Database.queryList("SELECT * FROM Users WHERE id=?;", (resultSet) -> {
             UserStateResponse userState = new UserStateResponse(userId);
             return userState;
@@ -69,6 +77,21 @@ public class GetUserState implements RequestHandler {
         }
     }
 
+    /** 
+     * UserStateResponse contains all known data about a user
+     * 
+     * username: Self-explanatory
+     * budgets: The budgets that the user keeps track of
+     * connections: The user's contacts
+     * 
+     * balanceDollars: The amount of dollars the user currently has in their account
+     * balanceCents: The amount of cents the user currently has
+     * 
+     * For example, if balanceDollars was 10 and balanceCents was 50, the user would have $10.50
+     * 
+     * The balance is divided into dollars and cents to avoid floating-point rounding errors
+     * @see FixedPoint
+     */
     private class UserStateResponse {
         public String username;
         public List<Budget> budgets;
@@ -77,6 +100,11 @@ public class GetUserState implements RequestHandler {
         public int balanceCents;
 
         public UserStateResponse(int userId) {
+            // The exceptions in the queries here will most likely never be hit unless the db is really messed up
+            // So on functions that need something to be returned, a default value (like an empty string or empty object) is returned
+            // Otherwise a stack trace is printed and that's the end of it
+
+            // The list returned by this query will be every budget the user has
             List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budgets WHERE user_id=?", (resultSet) -> {
                 Budget budget = new Budget();
 
@@ -92,6 +120,8 @@ public class GetUserState implements RequestHandler {
                 
                 return budget;
             }, userId);
+
+            // The list returned by this query will be every connection the user has
             List<String> connectionQuery = Database.queryList("SELECT * FROM Connections WHERE id1=? OR id2=?", (resultSet) -> {
                 int id1;
                 int id2;
@@ -103,6 +133,7 @@ public class GetUserState implements RequestHandler {
                     return "";
                 }
 
+                // We always want to show the other user's username, never our own
                 if (id1 == userId) {
                     return AuthenticatedUsers.usernameFromId(id2);
                 }

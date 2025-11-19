@@ -2,6 +2,18 @@ package tech.allydoes;
 
 import java.security.InvalidParameterException;
 
+/*
+ * Very basic fixed point implementation
+ * 
+ * We use this instead of the builtin floating-point types (float/double)
+ * because floating-point variables will have rounding errors
+ * 
+ * As floating point values move further away from 0, the amount of values
+ * that they can represent decreases. To prevent this problem, we use this
+ * custom FixedPoint class that restricts the input to 2 decimal digits
+ * 
+ * See https://0.30000000000000004.com/
+ */
 public class FixedPoint {
     private int integer;
     private int decimal;

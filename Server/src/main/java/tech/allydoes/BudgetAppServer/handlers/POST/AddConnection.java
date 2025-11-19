@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,11 +30,19 @@ public class AddConnection implements RequestHandler{
     }
 
     @Override
+    /**
+     * Adds a connection between the user that made the request and a username of his choice
+     * (Connections are basically contacts)
+     * 
+     * In the future this should prompt the reciever to make sure they want to be connected.
+     * Currently the app does not do this
+     */
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
+        // Standard request boilerplate
         AddConnectionRequest connectionRequest;
         try {
             connectionRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), AddConnectionRequest.class);
-        } catch (Exception e) {
+        } catch (JsonSyntaxException e) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
@@ -58,6 +67,7 @@ public class AddConnection implements RequestHandler{
         int userId = AuthenticatedUsers.idFromToken(connectionRequest.token);
         int connectionUserId = (int) userIdQuery.get(0);
 
+        // The connection format is just the ids of the two users.
         Database.executeUpdate("INSERT INTO Connections VALUES (?,?)", userId, connectionUserId);
         return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
     }

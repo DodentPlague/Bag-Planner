@@ -34,7 +34,15 @@ public class RegisterUser implements RequestHandler {
     }
 
     @Override
+    /**
+     * Takes a username and password and registers a new user in the database
+     * 
+     * The password is hashed with blake3 and salted with a random 20 byte value
+     * 
+     * Usernames have a character limit of 64 and passwords have a character limit of 128
+     */
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
+        // Standard request boilerplate
         RegisterRequest registerRequest;
         try {
             registerRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), RegisterRequest.class);
@@ -46,25 +54,33 @@ public class RegisterUser implements RequestHandler {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
+        // Convert the password into a byte array to make it easier to combine with the salt later
         byte[] passwordBytes = registerRequest.password.getBytes(StandardCharsets.UTF_8);
 
+        // Make sure that the username isn't a duplicate
         List<Object> existingUsername = Database.queryList("SELECT * FROM Users WHERE username=?;", (set) -> {return new Object();}, registerRequest.username);
         if (existingUsername.size() > 0) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.FORBIDDEN));
         }
 
+        // Use a cryptographically secure PRNG to make sure our salt isn't predictable
         SecureRandom secureRandom = new SecureRandom();
         byte[] salt = new byte[20];
         secureRandom.nextBytes(salt); 
 
+        // Combine the raw password and the salt
         byte[] saltedPassword = Arrays.copyOf(salt, salt.length + passwordBytes.length);
         System.arraycopy(passwordBytes, 0, saltedPassword, salt.length, passwordBytes.length);
+
         byte[] hashedPassword = hashPassword(saltedPassword);
 
         Database.executeUpdate("INSERT INTO Users (username,password,salt,balance_dollar,balance_cent) VALUES (?,?,?,0,0);", registerRequest.username, hashedPassword, salt);
         return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
     }
 
+    /**
+     * Hashes a password with blake3
+     */
     private byte[] hashPassword(byte[] saltedPassword) {
         // Taken from https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/Blake3.html
         Blake3 hasher = Blake3.initHash();

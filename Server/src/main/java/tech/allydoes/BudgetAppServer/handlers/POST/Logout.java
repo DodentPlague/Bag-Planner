@@ -26,6 +26,12 @@ public class Logout implements RequestHandler{
     }
 
     @Override
+    /**
+     * This function invalidates the supplied token, effectively logging out the user
+     * 
+     * This function is basically a wrapper around AuthenticatedUsers' Logout function
+     * @see AuthenticatedUsers
+     */
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
         LogoutRequest logoutRequest;
         try {

@@ -27,6 +27,14 @@ public class Transfer implements RequestHandler{
         return "POST";
     }   
     @Override
+    /**
+     * The idea of this endpoint is that it allows you to transfer money from a bank account to the app
+     * 
+     * However, the app does not support any banking systems yet, so this serves as a free money button
+     * It will not validate anything and just give you the amount
+     * 
+     * Takes a token and a money amount and will deposit that money amount in the user's account
+     */
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
         TransferRequest transferRequest;
         try {
