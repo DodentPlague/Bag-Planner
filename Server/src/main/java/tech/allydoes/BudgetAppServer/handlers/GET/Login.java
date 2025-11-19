@@ -3,22 +3,24 @@ package tech.allydoes.BudgetAppServer.handlers.GET;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.codec.digest.Blake3;
+
+import com.google.gson.Gson;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import tech.allydoes.AuthenticatedUsers;
 import tech.allydoes.Database;
 import tech.allydoes.BudgetAppServer.handlers.HttpServerHandler;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
 public class Login implements RequestHandler{
+    Gson gson = new Gson();
+
     @Override
     public String getRequestName() {
         return "Login";
@@ -31,17 +33,18 @@ public class Login implements RequestHandler{
 
     @Override
     public ChannelFuture processRequest(ChannelHandlerContext channelHandlerContext, FullHttpRequest request) {
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
-        Map<String, List<String>> parameters = queryStringDecoder.parameters();
-
-         if (!parameters.containsKey("username") || parameters.get("username").isEmpty()
-            || !parameters.containsKey("password") || parameters.get("password").isEmpty()) {
-           return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
+        LoginRequest loginRequest;
+        try {
+            loginRequest = gson.fromJson(request.content().toString(StandardCharsets.UTF_8), LoginRequest.class);
+        } catch (Exception e) {
+            return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
-        String username = parameters.get("username").get(0);
-        String password = parameters.get("password").get(0);
-        byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);
+        if (!loginRequest.isValidRequest()) {
+            return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
+        }
+
+        byte[] passwordBytes = loginRequest.password.getBytes(StandardCharsets.UTF_8);
 
         List<Object> loginInfoQuery = Database.queryList("SELECT * FROM User WHERE username=?", (resultSet) -> {
             try {
@@ -59,7 +62,7 @@ public class Login implements RequestHandler{
                 e.printStackTrace();
                 return null;
             }
-        }, username);
+        }, loginRequest.username);
 
         if (loginInfoQuery.size() == 0 || loginInfoQuery.get(0) == null) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.NOT_FOUND));
@@ -73,7 +76,8 @@ public class Login implements RequestHandler{
 
         if (Arrays.equals(hashedPassword, loginInfo.hashedPassword)) {
             String token = AuthenticatedUsers.authenticateUser(loginInfo.userId);
-            return HttpServerHandler.sendContent(token, request, channelHandlerContext);
+            LoginResponse response = new LoginResponse(token);
+            return HttpServerHandler.sendContent(gson.toJson(response), request, channelHandlerContext);
         }
         else {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.FORBIDDEN));
@@ -94,4 +98,21 @@ public class Login implements RequestHandler{
         public byte[] hashedPassword;
         public byte[] salt;
     };
+
+    private class LoginRequest {
+        public String username;
+        public String password;
+
+        public boolean isValidRequest() {
+            return (username != null && password != null);
+        }
+    }
+
+    private class LoginResponse {
+        public String token;
+
+        public LoginResponse(String token) {
+            this.token = token;
+        }
+    }
 }

@@ -39,10 +39,6 @@ public class CreateBudget implements RequestHandler{
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
-        if (createRequest.cents >= 100) {
-            return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
-        }
-
         Integer userId = AuthenticatedUsers.idFromToken(createRequest.token);
         try {
             Database.executeUpdate(
@@ -67,6 +63,10 @@ public class CreateBudget implements RequestHandler{
         public Integer cents;
 
         public boolean isValidRequest() {
+            if (cents >= 100) {
+                return false;
+            }
+
             return (
                 token != null &&
                 name != null &&

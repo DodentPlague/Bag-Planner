@@ -10,7 +10,6 @@ import tech.allydoes.BudgetAppServer.handlers.GET.Login;
 import tech.allydoes.BudgetAppServer.handlers.POST.CreateBudget;
 import tech.allydoes.BudgetAppServer.handlers.POST.Logout;
 import tech.allydoes.BudgetAppServer.handlers.POST.RegisterUser;
-import tech.allydoes.BudgetAppServer.handlers.POST.SetUserState;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +27,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         LOGGER.info("Initializing HTTP Server Handler and registering request handlers");
         RequestHandler[] handlers = {
             new GetUserState(),
-            new SetUserState(),
             new RegisterUser(),
             new Login(),
             new Logout(),
