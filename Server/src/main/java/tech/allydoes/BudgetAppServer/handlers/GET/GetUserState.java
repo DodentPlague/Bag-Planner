@@ -71,16 +71,9 @@ public class GetUserState implements RequestHandler {
     private class UserStateResponse {
         public String username;
         public List<Budget> budgets;
+        public List<String> connections;
 
         public UserStateResponse(int userId) {
-            List<Object> usernameQuery = Database.queryList("SELECT * FROM User WHERE id=?", (resultSet) -> {
-                try {
-                    return resultSet.getString("username");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                return "";
-            }, userId);
             List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budget WHERE user_id=?", (resultSet) -> {
                 Budget budget = new Budget();
 
@@ -96,9 +89,28 @@ public class GetUserState implements RequestHandler {
                 
                 return budget;
             }, userId);
+            List<String> connectionQuery = Database.queryList("SELECT * FROM Connection WHERE id1=? OR id2=?", (resultSet) -> {
+                int id1;
+                int id2;
 
-            this.username = (String) usernameQuery.get(0);
+                try {
+                    id1 = resultSet.getInt("id1");
+                    id2 = resultSet.getInt("id2");
+                } catch (SQLException e) {
+                    return "";
+                }
+
+                if (id1 == userId) {
+                    return AuthenticatedUsers.usernameFromId(id2);
+                }
+                else {
+                    return AuthenticatedUsers.usernameFromId(id1);
+                }
+            }, userId, userId);
+
+            this.username = AuthenticatedUsers.usernameFromId(userId);
             this.budgets = budgetQuery;
+            this.connections = connectionQuery;
         }
     }
 
