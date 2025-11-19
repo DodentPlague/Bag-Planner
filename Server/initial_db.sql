@@ -1,7 +1,32 @@
-PRAGMA foreign_keys=OFF;
+PRAGMA foreign_keys=ON;
 BEGIN TRANSACTION;
-CREATE TABLE Accounts(id INTEGER PRIMARY KEY ASC, username VARCHAR(64) NOT NULL);
-INSERT INTO Accounts VALUES(1,'user1');
-INSERT INTO Accounts VALUES(2,'thesillyguy');
-INSERT INTO Accounts VALUES(3,'mrrrrrrowwwwww');
+
+CREATE TABLE User(
+    id INTEGER PRIMARY KEY ASC, 
+    username TEXT, 
+    password BLOB, 
+    salt BLOB, 
+    balance_dollar INTEGER,
+    balance_cent INTEGER 
+);
+
+CREATE TABLE Budget(
+    user_id INTEGER,
+    name TEXT,
+    allocated_funds_dollars INTEGER,
+    allocated_funds_cents INTEGER,
+    funds_used_dollars INTEGER,
+    funds_used_cents INTEGER,
+
+    FOREIGN KEY(user_id) REFERENCES User(id)
+);
+
+CREATE TABLE Connection(
+    id1 INTEGER,
+    id2 INTEGER,
+
+    FOREIGN KEY(id1) REFERENCES User(id),
+    FOREIGN KEY(id2) REFERENCES User(id)
+);
+
 COMMIT;
