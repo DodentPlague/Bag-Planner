@@ -52,13 +52,13 @@ public class PayUser implements RequestHandler{
         FixedPoint newRecipientBalance = recipientBalance.add(transferAmount);
 
         Database.executeUpdate(
-            "UPDATE User SET balance_dollar=?, balance_cent=? WHERE id=?", 
+            "UPDATE Users SET balance_dollar=?, balance_cent=? WHERE id=?", 
             newSenderBalance.getInteger(),
             newSenderBalance.getDecimal(),
             senderId
         );
         Database.executeUpdate(
-            "UPDATE User SET balance_dollar=?, balance_cent=? WHERE id=?", 
+            "UPDATE Users SET balance_dollar=?, balance_cent=? WHERE id=?", 
             newRecipientBalance.getInteger(),
             newRecipientBalance.getDecimal(),
             recipientId

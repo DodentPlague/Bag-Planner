@@ -48,7 +48,7 @@ public class RegisterUser implements RequestHandler {
 
         byte[] passwordBytes = registerRequest.password.getBytes(StandardCharsets.UTF_8);
 
-        List<Object> existingUsername = Database.queryList("SELECT * FROM User WHERE username=?;", (set) -> {return new Object();}, registerRequest.username);
+        List<Object> existingUsername = Database.queryList("SELECT * FROM Users WHERE username=?;", (set) -> {return new Object();}, registerRequest.username);
         if (existingUsername.size() > 0) {
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.FORBIDDEN));
         }
@@ -61,7 +61,7 @@ public class RegisterUser implements RequestHandler {
         System.arraycopy(passwordBytes, 0, saltedPassword, salt.length, passwordBytes.length);
         byte[] hashedPassword = hashPassword(saltedPassword);
 
-        Database.executeUpdate("INSERT INTO User (username,password,salt,balance_dollar,balance_cent) VALUES (?,?,?,0,0);", registerRequest.username, hashedPassword, salt);
+        Database.executeUpdate("INSERT INTO Users (username,password,salt,balance_dollar,balance_cent) VALUES (?,?,?,0,0);", registerRequest.username, hashedPassword, salt);
         return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
     }
 

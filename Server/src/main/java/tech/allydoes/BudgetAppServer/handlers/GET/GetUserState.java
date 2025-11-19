@@ -48,7 +48,7 @@ public class GetUserState implements RequestHandler {
         }
 
         // TODO: differentiate between an SQLException (return 500) and non-existant id (return 404)
-        List<UserStateResponse> data = Database.queryList("SELECT * FROM User WHERE id=?;", (resultSet) -> {
+        List<UserStateResponse> data = Database.queryList("SELECT * FROM Users WHERE id=?;", (resultSet) -> {
             UserStateResponse userState = new UserStateResponse(userId);
             return userState;
         }, userId);
@@ -74,7 +74,7 @@ public class GetUserState implements RequestHandler {
         public List<String> connections;
 
         public UserStateResponse(int userId) {
-            List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budget WHERE user_id=?", (resultSet) -> {
+            List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budgets WHERE user_id=?", (resultSet) -> {
                 Budget budget = new Budget();
 
                 try {
@@ -89,7 +89,7 @@ public class GetUserState implements RequestHandler {
                 
                 return budget;
             }, userId);
-            List<String> connectionQuery = Database.queryList("SELECT * FROM Connection WHERE id1=? OR id2=?", (resultSet) -> {
+            List<String> connectionQuery = Database.queryList("SELECT * FROM Connections WHERE id1=? OR id2=?", (resultSet) -> {
                 int id1;
                 int id2;
 

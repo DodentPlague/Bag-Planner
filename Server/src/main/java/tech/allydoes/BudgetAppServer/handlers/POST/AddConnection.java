@@ -41,7 +41,7 @@ public class AddConnection implements RequestHandler{
             return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.BAD_REQUEST));
         }
 
-        List<Object> userIdQuery = Database.queryList("SELECT * FROM User where username=?", (resultSet) -> {
+        List<Object> userIdQuery = Database.queryList("SELECT * FROM Users where username=?", (resultSet) -> {
             try {
                 return resultSet.getInt("id");
             } catch (SQLException e) {
@@ -58,7 +58,7 @@ public class AddConnection implements RequestHandler{
         int userId = AuthenticatedUsers.idFromToken(connectionRequest.token);
         int connectionUserId = (int) userIdQuery.get(0);
 
-        Database.executeUpdate("INSERT INTO Connection VALUES (?,?)", userId, connectionUserId);
+        Database.executeUpdate("INSERT INTO Connections VALUES (?,?)", userId, connectionUserId);
         return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
     }
 

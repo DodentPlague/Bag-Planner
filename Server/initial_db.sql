@@ -1,7 +1,7 @@
 PRAGMA foreign_keys=ON;
 BEGIN TRANSACTION;
 
-CREATE TABLE User(
+CREATE TABLE Users(
     id INTEGER PRIMARY KEY ASC, 
     username TEXT, 
     password BLOB, 
@@ -10,7 +10,7 @@ CREATE TABLE User(
     balance_cent INTEGER 
 );
 
-CREATE TABLE Budget(
+CREATE TABLE Budgets(
     user_id INTEGER,
     name TEXT,
     allocated_funds_dollars INTEGER,
@@ -21,7 +21,7 @@ CREATE TABLE Budget(
     FOREIGN KEY(user_id) REFERENCES User(id)
 );
 
-CREATE TABLE Connection(
+CREATE TABLE Connections(
     id1 INTEGER,
     id2 INTEGER,
 

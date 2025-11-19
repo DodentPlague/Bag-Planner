@@ -42,7 +42,7 @@ public class CreateBudget implements RequestHandler{
         Integer userId = AuthenticatedUsers.idFromToken(createRequest.token);
         try {
             Database.executeUpdate(
-                "INSERT INTO Budget VALUES (?,?,?,?,0,0)", 
+                "INSERT INTO Budgets VALUES (?,?,?,?,0,0)", 
                 userId, 
                 createRequest.name, 
                 createRequest.dollars,

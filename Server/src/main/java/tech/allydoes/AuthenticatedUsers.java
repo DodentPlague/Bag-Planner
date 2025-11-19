@@ -39,7 +39,7 @@ public class AuthenticatedUsers {
     }
 
     public static String usernameFromId(int userId) {
-        List<Object> usernameQuery = Database.queryList("SELECT * FROM User WHERE id=?", (resultSet) -> {
+        List<Object> usernameQuery = Database.queryList("SELECT * FROM Users WHERE id=?", (resultSet) -> {
             try {
                 return resultSet.getString("username");
             } catch (SQLException e) {
@@ -51,7 +51,7 @@ public class AuthenticatedUsers {
     }
     
     public static int idFromUsername(String username) {
-        List<Object> idQuery = Database.queryList("SELECT * FROM User WHERE username=?", (resultSet) -> {
+        List<Object> idQuery = Database.queryList("SELECT * FROM Users WHERE username=?", (resultSet) -> {
             try {
                 return resultSet.getInt("id");
             } catch (SQLException e) {
@@ -63,7 +63,7 @@ public class AuthenticatedUsers {
     }
 
     public static FixedPoint getBalance(int userId) {
-        List<Object> idQuery = Database.queryList("SELECT * FROM User WHERE id=?", (resultSet) -> {
+        List<Object> idQuery = Database.queryList("SELECT * FROM Users WHERE id=?", (resultSet) -> {
             try {
                 int dollars = resultSet.getInt("balance_dollar");
                 int cents = resultSet.getInt("balance_cent");

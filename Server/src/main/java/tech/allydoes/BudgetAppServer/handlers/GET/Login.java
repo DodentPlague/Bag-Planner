@@ -46,7 +46,7 @@ public class Login implements RequestHandler{
 
         byte[] passwordBytes = loginRequest.password.getBytes(StandardCharsets.UTF_8);
 
-        List<Object> loginInfoQuery = Database.queryList("SELECT * FROM User WHERE username=?", (resultSet) -> {
+        List<Object> loginInfoQuery = Database.queryList("SELECT * FROM Users WHERE username=?", (resultSet) -> {
             try {
                 LoginInfo info = new LoginInfo();
                 info.userId = resultSet.getInt("id");

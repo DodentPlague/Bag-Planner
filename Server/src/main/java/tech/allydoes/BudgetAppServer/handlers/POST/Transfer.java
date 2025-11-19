@@ -45,7 +45,7 @@ public class Transfer implements RequestHandler{
         FixedPoint newBalance = oldBalance.add(new FixedPoint(transferRequest.dollars, transferRequest.cents));
 
         Database.executeUpdate(
-            "UPDATE User SET balance_dollar=?,balance_cent=? WHERE id=?",
+            "UPDATE Users SET balance_dollar=?,balance_cent=? WHERE id=?",
             newBalance.getInteger(),
             newBalance.getDecimal(),
             userId
