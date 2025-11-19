@@ -49,14 +49,8 @@ public class GetUserState implements RequestHandler {
 
         // TODO: differentiate between an SQLException (return 500) and non-existant id (return 404)
         List<UserStateResponse> data = Database.queryList("SELECT * FROM User WHERE id=?;", (resultSet) -> {
-            try {
-                UserStateResponse userState = new UserStateResponse();
-                userState.username = resultSet.getString("username");
-                return userState;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return null;
-            }
+            UserStateResponse userState = new UserStateResponse(userId);
+            return userState;
         }, userId);
         
         if (data.size() == 0 || data.get(0) == null) {
@@ -76,5 +70,43 @@ public class GetUserState implements RequestHandler {
 
     private class UserStateResponse {
         public String username;
+        public List<Budget> budgets;
+
+        public UserStateResponse(int userId) {
+            List<Object> usernameQuery = Database.queryList("SELECT * FROM User WHERE id=?", (resultSet) -> {
+                try {
+                    return resultSet.getString("username");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return "";
+            }, userId);
+            List<Budget> budgetQuery = Database.queryList("SELECT * FROM Budget WHERE user_id=?", (resultSet) -> {
+                Budget budget = new Budget();
+
+                try {
+                    budget.name = resultSet.getString("name");
+                    budget.allocated_dollars = resultSet.getInt("allocated_funds_dollars");
+                    budget.allocated_cents = resultSet.getInt("allocated_funds_cents");
+                    budget.used_dollars = resultSet.getInt("funds_used_dollars");
+                    budget.used_cents = resultSet.getInt("funds_used_cents");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                
+                return budget;
+            }, userId);
+
+            this.username = (String) usernameQuery.get(0);
+            this.budgets = budgetQuery;
+        }
+    }
+
+    public class Budget {
+        public String name;
+        public int allocated_dollars;
+        public int allocated_cents;
+        public int used_dollars;
+        public int used_cents;
     }
 }
