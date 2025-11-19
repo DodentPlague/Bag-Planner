@@ -13,8 +13,8 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import tech.allydoes.AuthenticatedUsers;
 import tech.allydoes.Database;
-import tech.allydoes.Server;
 import tech.allydoes.BudgetAppServer.handlers.HttpServerHandler;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
@@ -72,8 +72,7 @@ public class Login implements RequestHandler{
         byte[] hashedPassword = hashPassword(saltedPassword);
 
         if (Arrays.equals(hashedPassword, loginInfo.hashedPassword)) {
-            String token = Server.authenticateUser(loginInfo.userId);
-            Server.authenticatedUsers.put(token, loginInfo.userId);
+            String token = AuthenticatedUsers.authenticateUser(loginInfo.userId);
             return HttpServerHandler.sendContent(token, request, channelHandlerContext);
         }
         else {

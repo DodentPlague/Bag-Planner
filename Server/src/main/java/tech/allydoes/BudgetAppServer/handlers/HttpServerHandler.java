@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import tech.allydoes.BudgetAppServer.handlers.GET.GetUserState;
 import tech.allydoes.BudgetAppServer.handlers.GET.Login;
+import tech.allydoes.BudgetAppServer.handlers.POST.CreateBudget;
 import tech.allydoes.BudgetAppServer.handlers.POST.Logout;
 import tech.allydoes.BudgetAppServer.handlers.POST.RegisterUser;
 import tech.allydoes.BudgetAppServer.handlers.POST.SetUserState;
@@ -31,6 +32,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             new RegisterUser(),
             new Login(),
             new Logout(),
+            new CreateBudget()
         };
         for (RequestHandler handler : handlers) {
             requestHandlers.put(handler.getRequestName().toLowerCase(), handler);

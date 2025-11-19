@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import tech.allydoes.Server;
+import tech.allydoes.AuthenticatedUsers;
 import tech.allydoes.BudgetAppServer.handlers.RequestHandler;
 
 public class Logout implements RequestHandler{
@@ -34,13 +34,7 @@ public class Logout implements RequestHandler{
 
         String token = parameters.get("token").get(0);
 
-        for (String key : Server.authenticatedUsers.keySet()) {
-            if (key.equals(token)) {
-                Server.authenticatedUsers.remove(token);
-                return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
-            }
-        }
-        
-        return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.NOT_FOUND));
+        AuthenticatedUsers.Logout(token);
+        return channelHandlerContext.writeAndFlush(new DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.OK));
     } 
 }
