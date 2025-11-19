@@ -48,5 +48,38 @@ public class AuthenticatedUsers {
             return "";
         }, userId);
         return (String) usernameQuery.get(0);
-    } 
+    }
+    
+    public static int idFromUsername(String username) {
+        List<Object> idQuery = Database.queryList("SELECT * FROM User WHERE username=?", (resultSet) -> {
+            try {
+                return resultSet.getInt("id");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }, username);
+        return (int) idQuery.get(0);
+    }
+
+    public static FixedPoint getBalance(int userId) {
+        List<Object> idQuery = Database.queryList("SELECT * FROM User WHERE id=?", (resultSet) -> {
+            try {
+                int dollars = resultSet.getInt("balance_dollar");
+                int cents = resultSet.getInt("balance_cent");
+
+                return new FixedPoint(dollars, cents);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }, userId);
+
+        if (idQuery.size() == 0 || idQuery.get(0) == null) {
+            return null;
+        }
+
+        return (FixedPoint) idQuery.get(0);
+    }
 }
