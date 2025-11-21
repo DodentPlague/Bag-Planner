@@ -44,7 +44,7 @@ public class Server {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
+    }   
 
     public static void main(String[] args) throws InterruptedException {
         new Server(8080).start();

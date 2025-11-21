@@ -16,10 +16,9 @@ A lot of functions take tokens. To get a token, use `Login`
 ## GET endpoints:
 `GetUserState`: Takes a token and returns all info about the user associated with the token.
 ```
-GET http://server.com/GetUserState with body:
-{
-    "token":"insert-token-here", 
-}
+GET http://server.com/GetUserState with URI paramter:
+    "token": STRING, 
+
 
 Will return:
 {
@@ -41,11 +40,9 @@ Will return:
 
 `Login`: Takes a username and password and if it's valid returns a token, otherwise returns a 403 FORBIDDEN
 ```
-GET http://server.com/Login with body:
-{
-    "username": "theman",
-    "password": "mylittlepassword"
-}
+GET http://server.com/Login with URI paramters
+    "username" STRING
+    "password" STRING
 
 Will return:
 {
