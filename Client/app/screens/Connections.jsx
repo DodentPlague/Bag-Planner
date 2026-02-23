@@ -38,7 +38,7 @@ export default function ConnectionsScreen() {
     }
 
     try {
-      await fetch("https://testing.allydoes.tech/AddConnection", {
+      await fetch("http://localhost:8080/AddConnection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

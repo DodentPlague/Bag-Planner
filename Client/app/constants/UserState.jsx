@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./Style.jsx";
 
 const AppContext = createContext();
-const SERVER_URL = "https://testing.allydoes.tech";
+const SERVER_URL = "http://localhost:8080";
 
 export function AppProvider({ children }) {
   const [token, setToken] = useState(null);

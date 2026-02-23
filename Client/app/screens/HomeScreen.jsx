@@ -26,7 +26,7 @@ export default function HomeScreen() {
     const [amountInput, setAmountInput] = useState("");
     const [accountInput, setAccountInput] = useState("");
 
-    const SERVER_URL = "https://testing.allydoes.tech";
+    const SERVER_URL = "http://localhost:8080";
 
     const formatMoney = () => {
         return `${balanceDollars}.${balanceCents.toString().padStart(2, "0")}`;

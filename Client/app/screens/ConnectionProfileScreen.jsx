@@ -50,7 +50,7 @@ export default function ConnectionProfileScreen() {
       return;
     }
 
-    let res = await fetch("https://testing.allydoes.tech/PayUser", {
+    let res = await fetch("http://localhost:8080/PayUser", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
